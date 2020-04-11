@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Form";
+}
+
+<div class="form">
+    <form sp-controller="Home" asp-action="GetID" method="post">
+        <p>ОПИСАНИЕ ЗАДАЧИ<Br>
+        <textarea name="description" cols="60" rows="5"></textarea></p>
+        <p><input type="submit" value="Получить идентификатор задачи"></p>
+    </form>
+</div>
