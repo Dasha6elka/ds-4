@@ -3,3 +3,4 @@ docker stop client
 docker stop redis
 docker stop nats
 docker stop logger
+docker stop calc

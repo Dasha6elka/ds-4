@@ -1,0 +1,14 @@
+@model TaskViewModel
+@{
+    ViewData["Title"] = "Task Page";
+}
+
+@if (Model.Status == "in_progress")
+{
+    <div>In process of ranking!</div>
+}
+else
+{
+    <div>ID: @Model.Id</div>
+    <div>Measure: @Model.Meausre</div>
+}

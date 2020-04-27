@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using NATS.Client;
 using StackExchange.Redis;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace JobLogger
+namespace TextRankCalc
 {
     class Program
     {
@@ -17,7 +17,7 @@ namespace JobLogger
             using (ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_HOST")))
             {
                 subscriberService.Run(connection, redis);
-                Console.WriteLine("JobLigger listening started.");
+                Console.WriteLine("TextRankCalc listening started.");
 
                 Task.Factory.StartNew(() =>
                 {

@@ -6,6 +6,9 @@ using Microsoft.Extensions.Logging;
 using NATS.Client;
 using System.Text;
 using StackExchange.Redis;
+using BackendApi.Models;
+using System.Text.Json;
+using System.Threading;
 
 namespace BackendApi.Services
 {
@@ -26,18 +29,47 @@ namespace BackendApi.Services
         public override Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
         {
             string id = Guid.NewGuid().ToString();
-            var resp = new RegisterResponse
-            {
-                Id = id
-            };
+            var resp = new RegisterResponse{ Id = id };
             _jobs[id] = request.Description;
+
+            var model = new RedisModel { Description = request.Description, Data = request.Data };
+            string result = JsonSerializer.Serialize(model);
+            IDatabase db = _redis.GetDatabase();
+            db.StringSet(id, result);
 
             string message = $"JobCreated|{id}";
             byte[] payload = Encoding.Default.GetBytes(message);
             _connection.Publish("events", payload);
 
+            return Task.FromResult(resp);
+        }
+
+        public override Task<GetProcessingResultResponse> GetProcessingResult(GetProcessingResultRequest request, ServerCallContext context)
+        {
             IDatabase db = _redis.GetDatabase();
-            db.StringSet(id, request.Description);
+            double measure = -1;
+            int i = 0;
+            while (i < 5)
+            {
+                string JSON = db.StringGet(request.Id);
+                var model = JsonSerializer.Deserialize<RedisModel>(JSON);
+                if (model.Measure != -1)
+                {
+                    measure = model.Measure;
+                    break;
+                }
+                Thread.Sleep(1000);
+                i++;
+            }
+            var resp = new GetProcessingResultResponse{ Measure = measure };
+            if (measure == -1)
+            {
+                resp.Status = "in_progress";
+            }
+            else
+            {
+                resp.Status = "done";
+            }
 
             return Task.FromResult(resp);
         }

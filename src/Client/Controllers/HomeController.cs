@@ -30,13 +30,12 @@ namespace Client.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetID(string description)
+        public async Task<RedirectToActionResult> GetID(string description, string data)
         {
             using var channel = GrpcChannel.ForAddress("http://" + Environment.GetEnvironmentVariable("API_HOST"));
             var client = new Job.JobClient(channel);
-            var reply = await client.RegisterAsync(
-                              new RegisterRequest { Description = description });
-            return View("Task", new ViewModel { RequestId = reply.Id });
+            var reply = await client.RegisterAsync(new RegisterRequest { Description = description, Data = data });
+            return RedirectToAction("Index", "Task", new { JobId = reply.Id });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
